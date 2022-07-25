@@ -40,9 +40,9 @@ class Network:
         # тут всё просто:
         # для каждого слоя умножаем матрицу его весов на вектор входных активаций
         # и прибавляем смещения нейронов (так мы получили z)
-        # каждый z пропускаем через функцию активации и получаем вектор выходных активаций слоя 
+        # каждый z пропускаем через функцию активации и получаем вектор выходных активаций слоя
         # и так до тех пор, пока не доберёмся до выходного слоя
-        # 
+        #
         # здесь можно функцию активации сделать параметром (по умолчанию - сигмоида)
 
         for b, w in zip(self.biases, self.weights):
@@ -69,21 +69,30 @@ class Network:
 
         if test_data is not None:
             n_test = len(test_data)
+
         n = len(training_data)
         success_tests = 0
+
+        # 1. Ходим в цикл по эпохам
         for j in range(epochs):
+
+            # 2. случайным образом разбиваем входные данные на батчи
             random.shuffle(training_data)
             mini_batches = [
                 training_data[k:k+mini_batch_size]
-                for k in range(0, n, mini_batch_size)]
+                for k in range(0, n, mini_batch_size)
+            ]
+
+            # 3. входим в цикл по батчам
             for mini_batch in mini_batches:
                 self.update_mini_batch(mini_batch, eta)
+
             if test_data is not None and self.output:
                 success_tests = self.evaluate(test_data)
-                print("Эпоха {0}: {1} / {2}".format(
-                    j, success_tests, n_test))
+                print("Эпоха {0}: {1} / {2}".format(j, success_tests, n_test))
             elif self.output:
                 print("Эпоха {0} завершена".format(j))
+
         if test_data is not None:
             return success_tests / n_test
 
@@ -119,14 +128,26 @@ class Network:
 
         # прямое распространение (forward pass)
 
-        for b, w in zip(self.biases, self.weights):
-            # посчитать активации
-            pass
+        # прямое распространение для примера уже реализовано => используем его
+        # так не получится, потому что нам нужно знать активации каждого слоя на этапе прямого распространения
+        # a = self.feedforward(x)
 
+        # создаём массив активаций такой же, как и структура нейронной сети
+        # активации входного слоя нам известны - это х, дальше считаем
+        a = [x]
+        i = 0
+        for b, w in zip(self.biases, self.weights):
+            z = np.dot(w, a[i])+b
+            a.append(sigmoid(z))
+            i += 1
         # обратное распространение (backward pass)
-        delta =  # ошибка выходного слоя
-        nabla_b[-1] =  # производная J по смещениям выходного слоя
-        nabla_w[-1] =  # производная J по весам выходного слоя
+
+        # TODO: активации вроде правильно считаются, а вот обратное распространение ошибки хз
+        # первый кит - считаем ошибку выходного слоя
+        delta = (a[-1] - y) * a[-1] * (1 - a[-1])
+
+        nabla_b[-1] = delta
+        nabla_w[-1] = a[-1]*delta
 
         # Обратите внимание, что переменная l в цикле ниже используется
         # немного иначе, чем в лекциях.  Здесь l = 1 означает последний слой,
@@ -137,9 +158,10 @@ class Network:
         for l in range(2, self.num_layers):
             # дополнительные вычисления, чтобы легче записывалось
             #
-            delta =  # ошибка на слое L-l
-            nabla_b[-l] =  # производная J по смещениям L-l-го слоя
-            nabla_w[-l] =  # производная J по весам L-l-го слоя
+            delta = self.weights[-l+1].T.dot(delta) * a[-l] * (1 - a[-l])
+            print(delta)
+            nabla_b[-l] = delta
+            nabla_w[-l] = a[-l-1] * delta
         return nabla_b, nabla_w
 
     def evaluate(self, test_data):
