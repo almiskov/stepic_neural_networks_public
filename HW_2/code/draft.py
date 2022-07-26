@@ -40,4 +40,9 @@ nn.weights = [np.array([[-1, 1, -1], [1, -1, 1]])]
 x = np.array([[1], [2], [3]])
 y = np.array([[0], [1]])
 
-nn.backprop(x, y)
+# nn.backprop(x, y)
+
+a = np.array([1, 2, 3, 1, 2, 3]).reshape(3, 2)
+print(a.shape)
+a = a[:, np.newaxis]
+print(a.shape)

@@ -18,7 +18,10 @@ def sample_backprop1():
     """
     nn = Network([3, 2])
     nn.biases = [np.array([[-1], [-1]])]
-    nn.weights = [np.array([[-1, 1, -1], [1, -1, 1]])]
+    nn.weights = [np.array([
+      [-1, 1, -1],
+      [1, -1, 1]
+      ])]
     x = np.array([[1], [2], [3]])
     y = np.array([[0], [1]])
 
